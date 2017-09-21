@@ -85,12 +85,6 @@ context [
 			out
 		]
 		swap-rows: func [r1 r2][ctx/swap-rows r1 r2 self]
-		;func [r1 r2 /local tmp][
-		;	tmp: get-row r1 
-		;	change/part at data r1 - 1 * cols + 1 get-row r2 cols 
-		;	change/part at data r2 - 1 * cols + 1 tmp cols 
-		;	show
-		;]
 		determinant: does [ctx/determinant self]
 		trace: does [ctx/trace self]
 		identity: func [/side d][either side [ctx/identity/side self d][ctx/identity self]]
