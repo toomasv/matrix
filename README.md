@@ -93,7 +93,7 @@ matrix [2x3 [1 2 3 4 5 6] X 3x2 [2 3 4 5 6 7]]
     1 2 3 
     3 4 5
 ]
-;### Reduced row eschelon form
+;### Reduced row eschelon form (continued from last example)
 >> matrix [o: rref n]
 == [
     1.0 0.0 -1.0 
