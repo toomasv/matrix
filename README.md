@@ -3,7 +3,7 @@ Little matrix DSL for Red
 
 Features:
 * binary ops: `['+ | '- | '* | '/ | '% | '** | '>> | '<< | '>>> | 'and | 'or | 'xor | 'div | 'x | 'augment]`
-* unary-matrix ops `transpose`, `rotate n`, `swap [rows | cols] x1 x2`, `determinant`, `trace`, `identity`, `rref` (reduced row eschelon form), `invert` 
+* unary-matrix ops `transpose`, `rotate n`, `swap rows x1 x2`, `determinant`, `trace`, `identity`, `rref` (reduced row eschelon form), `invert` 
 * `div` turns args to floats
 * `x` is standard matrix multiplication op
 * `*` is Hadamard multiplication op
