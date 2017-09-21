@@ -2,12 +2,13 @@
 Little matrix DSL for Red
 
 Features:
-* binary ops: `['+ | '- | '* | '/ | '% | '** | '>> | '<< | '>>> | 'and | 'or | 'xor | 'div | 'x]`
-* unary-matrix ops `transpose` and `rotate n` 
+* binary ops: `['+ | '- | '* | '/ | '% | '** | '>> | '<< | '>>> | 'and | 'or | 'xor | 'div | 'x | 'augment]`
+* unary-matrix ops `transpose`, `rotate n`, `swap [rows | cols] x1 x2`, `determinant`, `trace`, `identity`, `rref` (reduced row eschelon form), `invert` 
 * `div` turns args to floats
 * `x` is standard matrix multiplication op
 * `*` is Hadamard multiplication op
 * `X` is Kronecker's multiplication op
+* `augment` appends a matrix with same number of rows
 * ops with scalar args
 * order of ops as usual
 * parens to change priority
@@ -19,6 +20,17 @@ do %matrix.red
     1 2 3 
     4 5 6
 ]
+;### Prettify ###
+>> matrix [m: 2x3 [1 2 3 444 55 666]]
+== [
+    1 2 3 
+    444 55 666
+]
+>> m/pretty
+┌            ┐
+│   1  2   3 │
+│ 444 55 666 │
+└            ┘ 
 ;### Unary ops ###
 ; a) Transpose 
 >> matrix [transpose 2x3 [1 2 3 4 5 6]]
@@ -27,7 +39,7 @@ do %matrix.red
     2 5 
     3 6
 ]
-; b) Rotate (clockwise [1 | 2 | 3]) 
+; b) Rotate (clockwise [1 | 2 | 3] or counter-clockwise [-3 | -2 | -1]) 
 >> matrix [rotate 1 2x3[1 2 3 4 5 6]]
 == [
     4 1 
@@ -40,6 +52,12 @@ do %matrix.red
     3 2 1
 ]
 >> matrix [rotate 3 2x3[1 2 3 4 5 6]]
+== [
+    3 6 
+    2 5 
+    1 4
+]
+>> matrix [rotate -1 2x3[1 2 3 4 5 6]]
 == [
     3 6 
     2 5 
@@ -69,13 +87,37 @@ matrix [2x3 [1 2 3 4 5 6] X 3x2 [2 3 4 5 6 7]]
     4 5 8 10 12 15 
     6 7 12 14 18 21 
     8 12 10 15 12 ...
+;### Augmenting ###
+>> matrix [m: 2x2[1 2 3 4] n: m augment 2x1[3 5]]
+== [
+    1 2 3 
+    3 4 5
+]
+;### Reduced row eschelon form
+>> matrix [o: rref n]
+== [
+    1.0 0.0 -1.0 
+    0.0 1.0 2.0
+]
+>> ((1 * -1) + (2 * 2)) = 3
+== true
+>> ((3 * -1) + (4 * 2)) = 5
+== true
+
+a: first m/split-col 3
+b: second o/split-col 3
+matrix [a x b]
+== [
+    3.0 
+    5.0
+]
 ;### Boolean logic ###
 matrix [2x2 [1 0 1 1] and 2x2 [0 1 1 0]]
 == [
     0 0 
     1 0
 ]
-;### Scalar args ###
+;### Scalar args ### NB! This doesn't work as intended after last update!
 matrix [3x3 [1 2 3 2 4 5 3 6 2] * 2 - 5]
 == [
     -3 -1 1 
@@ -148,4 +190,58 @@ matrix [2x2[1-2-2017 1-3-2018 1-4-2017 31-5-2017] + 2x2[2 1 3 3]]
     192.168.1.50 26-Mar-2018 
     13:00:00 4%
 ]
+;### Determinant ###
+>> matrix [determinant 2x2[1 2 3 4]]
+== -5
+;### Trace ###
+>> matrix [trace 2x2[1 2 3 4]]
+== 5
+;### Identity ###
+; a) Symmetric
+>> matrix [identity 3x3[1 2 3 4 5 6 7 8 9]]
+== [
+    1 0 0 
+    0 1 0 
+    0 0 1
+]
+; b) Asymmetric
+>> matrix [identity 'l 2x3[1 2 3 4 5 6]]
+== [
+    1 0 
+    0 1
+]
+>> matrix [identity 'r 2x3[1 2 3 4 5 6]]
+== [
+    1 0 0 
+    0 1 0 
+    0 0 1
+]
+;### Invert ###
+>> matrix [m: 2x2[1 2 3 4] n: invert m]
+== [
+    -2.0 1.0 
+    1.5 -0.5
+]
+>> matrix [x: m x n]
+== [
+    1.0 0.0 
+    0.0 1.0
+]
+>> matrix [m: 3x3[2 3 4 5 2 3 4 2 1] n: invert m]
+== [
+    -0.1904761904761904 0.2380952380952381 0.04761904761904758 
+    0.3333...
+>> matrix [x: m x n]
+== [
+    1.0 0.0 0.0 
+    2.220446049250313e-16 1.0 -2.220446049250313e-16 
+   ...
+>> x/pretty
+┌                                                  ┐
+│                   1.0 0.0                    0.0 │
+│ 2.220446049250313e-16 1.0 -2.220446049250313e-16 │
+│                   0.0 0.0                    1.0 │
+└                                                  ┘ 
+>> 0.000000000000001 > 2.220446049250313e-16
+== true
 ```
