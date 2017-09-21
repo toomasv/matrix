@@ -116,7 +116,7 @@ context [
 		either m/square? [
 			switch/default m/cols [
 				1	[m/data/1]
-				2 	[math [m/data/1 * m/data/3 - m/data/2 * m/data/4]]
+				2 	[math [m/data/1 * m/data/4 - m/data/2 * m/data/3]]
 			][
 				r: make block! m/cols l: make block! m/cols
 				repeat i m/cols [
