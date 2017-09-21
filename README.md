@@ -155,7 +155,7 @@ matrix [3x3 [1 2 3 2 4 5 3 6 2] * 2 - 5]
     4 5 6 
     7 8 9
 ]
->> probe m
+>> probe m ; This has changed! More funcs.
 make object! [
     rows: 3
     cols: 3
