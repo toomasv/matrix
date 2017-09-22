@@ -1,9 +1,9 @@
 Red [
 	Author: "Toomas Vooglaid"
 	Date: 7-9-2017
-	Last-update: 21-9-2017
+	Last-update: 22-9-2017
 ]
-context [
+mx: context [
 	ctx: self
 	mtx: object [
 		rows: cols: data: none
@@ -11,11 +11,8 @@ context [
 		get-row: func [row][copy/part at data row - 1 * cols + 1 cols]
 		remove-row: func [row][remove/part at data get-idx row 1 cols rows: rows - 1 show]
 		remove-col: func [col][
-			data: remove skip data col - 1
-			loop rows - 1 [data: remove skip data cols - 1]
-			data: head data
-			cols: cols - 1
-			show
+			loop rows [data: remove skip data cols - 1]
+			data: head data cols: cols - 1 show
 		]
 		get-idx: func [row col][index? at data row - 1 * cols + col]
 		get-at: func [row col][pick data row - 1 * cols + col]
@@ -23,6 +20,16 @@ context [
 		swap-dim: has [c][c: cols cols: rows rows: c]
 		square?: does [rows = cols]
 		symmetric?: has [d][transpose d: copy data transpose equal? data d]
+		diagonal?: function [][
+			either square? [
+				repeat i cols [
+					repeat j rows [
+						if (i <> j) and (0 <> get-at i j) [return false]
+				]] 
+				true
+			][false]
+		]
+		zero?: does [0 = ctx/summa data]
 		sub-exclude: func [rs cs /local m2][ ; TBD
 			m2: copy self
 			switch type?/word rs [
@@ -88,6 +95,7 @@ context [
 		determinant: does [ctx/determinant self]
 		trace: does [ctx/trace self]
 		identity: func [/side d][either side [ctx/identity/side self d][ctx/identity self]]
+		split-col: func [col][ctx/split-col col self]
 	]
 	vector-op: func [op a b /local i][
 		case [
@@ -104,11 +112,12 @@ context [
 			]
 		]
 	]
-	product: func [blk /local out][out: 1 forall blk [out: out * blk/1]]
-	summa: func [blk /local out][out: 0 forall blk [out: out + blk/1]]
+	product: func [blk /local out][out: 1 forall blk [out: out * blk/1] out]
+	summa: func [blk /local out][out: 0 forall blk [out: out + blk/1] out]
 	determinant: func [m /local i r l][
 		either m/square? [
 			switch/default m/cols [
+				0	[1]
 				1	[m/data/1]
 				2 	[math [m/data/1 * m/data/4 - m/data/2 * m/data/3]]
 			][
@@ -127,7 +136,7 @@ context [
 		either m/square? [
 			summa m/get-diagonal 1 'r
 		][
-			cause-error 'user 'message ["Trace is defined for squere matrices only!"]
+			cause-error 'user 'message ["Trace is defined for square matrices only!"]
 		]
 	]
 	add: func [op m1 m2][
@@ -271,7 +280,6 @@ context [
 		|	set w word! if (object? get/any w)(set w m: make mtx get w)
 		| 	set m number!
 		]	(insert matrices m)]
-		op-probe: [ahead [[pair! [block! | word!] | word!] ops-rule]]
 		unary-rule: [
 			set unary [
 				'transpose 
@@ -313,6 +321,7 @@ context [
 				]
 			)
 		]
+		op-probe: [ahead [[pair! [block! | word!] | word!] ops-rule]]
 		op-rule: [
 			matrix-rule set op' ops-rule (insert ops op') expr-rule (
 				op': take ops set [m2 m1] take/part matrices 2
