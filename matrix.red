@@ -3,7 +3,7 @@ Red [
 	Date: 7-9-2017
 	Last-update: 22-9-2017
 ]
-mx: context [
+context [
 	ctx: self
 	mtx: object [
 		rows: cols: data: none
@@ -188,23 +188,20 @@ mx: context [
 		m/data: data 
 		m
 	]
-	swap-rows: func [r1 r2 m /local tmp][
+	swap-rows: function [r1 r2 m][
 		tmp: m/get-row r1 
 		change/part at m/data r1 - 1 * m/cols + 1 m/get-row r2 m/cols 
 		change/part at m/data r2 - 1 * m/cols + 1 tmp m/cols 
 		m
 	]
 	identity: func [m /side d /local i][
-		d: either side [switch d ['l ['rows] 'r ['cols]]]['rows]
-		m/square?
+		d: either side [case [d = 'l ['rows] d = 'r ['cols]]]['rows]
 		either (side or m/square?) [
 			data: make block! power m/:d 2
 			repeat i m/:d [repeat j m/:d [append data either i = j [1][0]]]
 			make mtx compose [cols: (m/:d) rows: (m/:d) data: (reduce [data])] 
 		][
-			cause-error 'user 'message [
-				{You need to determine /side ['l | 'r] for non-square matrix!}
-			]
+			cause-error 'user 'message ["You need to determine /side ['l | 'r] for non-square matrix!"]
 		]
 	]
 	augment: func [m1 m2 /local i j][
