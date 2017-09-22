@@ -74,6 +74,7 @@ matrix [2x3 [1 2 3 4 5 6] * 2x3 [2 3 4 5 6 7]]
     2 6 12 
     20 30 42
 ]
+;Any binary op from ['+ | '- | '* | '/ | '% | '** | '>> | '<< | '>>> | 'and | 'or | 'xor | 'div] 
 ;### Standard product ###
 matrix [2x3 [1 2 3 4 5 6] x 3x2 [2 3 4 5 6 7]]
 == [
