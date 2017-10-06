@@ -1,9 +1,9 @@
 Red [
 	Author: "Toomas Vooglaid"
 	Date: 7-9-2017
-	Last-update: 22-9-2017
+	Last-update: 4-10-2017
 ]
-context [
+mx: context [
 	ctx: self
 	mtx: object [
 		rows: cols: data: none
@@ -16,6 +16,25 @@ context [
 		]
 		get-idx: func [row col][index? at data row - 1 * cols + col]
 		get-at: func [row col][pick data row - 1 * cols + col]
+		get-row-idx: func [idx][idx - 1 / cols + 1]
+		get-col-idx: func [idx][idx - 1 % cols + 1]
+		get-diagonal: func [i dir /local out][
+			data: skip data i - 1 
+			set [comp inc] switch dir [r [0 :+] l [1 :-]]
+			out: collect [
+				while [not tail? data][
+					keep data/1 
+					data: case [
+						all [dir = 'r 0 = ((index? data) % cols)] [next data]
+						all [dir = 'l 1 = ((index? data) % cols)] [skip data 2 * cols - 1]
+						true [skip data cols + either dir = 'r [1][-1]]
+					]
+				]
+			]
+			data: head data
+			out
+		]
+		get-order: does [to-pair reduce [rows cols]]
 		to-float: does [forall data [data/1: system/words/to-float data/1]]
 		swap-dim: has [c][c: cols cols: rows rows: c]
 		square?: does [rows = cols]
@@ -30,6 +49,8 @@ context [
 			][false]
 		]
 		zero?: does [0 = ctx/summa data]
+		singular?: degenerate?: does [determinant = 0]
+		invertible?: nonsingular?: nondegenerate?: does [not singular?]
 		sub-exclude: func [rs cs /local m2][ ; TBD
 			m2: copy self
 			switch type?/word rs [
@@ -75,27 +96,42 @@ context [
 			]
 			print [#"└" pad #" " step #"┘" #"^/"]
 		]
-		get-diagonal: func [i dir /local out][
-			data: skip data i - 1 
-			set [comp inc] switch dir [r [0 :+] l [1 :-]]
-			out: collect [
-				while [not tail? data][
-					keep data/1 
-					data: case [
-						all [dir = 'r 0 = ((index? data) % cols)] [next data]
-						all [dir = 'l 1 = ((index? data) % cols)] [skip data 2 * cols - 1]
-						true [skip data cols + either dir = 'r [1][-1]]
-					]
-				]
-			]
-			data: head data
-			out
-		]
 		swap-rows: func [r1 r2][ctx/swap-rows r1 r2 self]
 		determinant: does [ctx/determinant self]
 		trace: does [ctx/trace self]
 		identity: func [/side d][either side [ctx/identity/side self d][ctx/identity self]]
 		split-col: func [col][ctx/split-col col self]
+		neighbours: func [row col /local out][
+			out: copy []
+			foreach [r c] case [
+				all [row = 1 col = 1][[1 2 2 1 2 2]]
+				all [row = 1 col = cols] [reduce [
+						1 cols - 1 2 cols - 1 2 cols
+					]] 
+				all [row = rows col = 1] [reduce [
+						rows - 1 1 rows - 1 2 rows 2
+					]]
+				all [row = rows col = cols] [reduce [
+						rows - 1 cols - 1 rows - 1 cols rows cols - 1
+					]] 
+				row = 1  [reduce [
+						1 col - 1 1 col + 1 2 col - 1 2 col 2 col + 1
+					]]
+				row = rows [reduce [
+						row - 1 col - 1 row - 1 col row - 1 col + 1 row col - 1 row col + 1
+					]]
+				col = 1 [reduce [
+						row - 1 col row - 1 col + 1 row col + 1 row + 1 col row + 1 col + 1
+					]]
+				col = cols [reduce [
+						row - 1 col - 1 row - 1 col row col - 1 row + 1 col - 1 row + 1 col
+					]]
+				true [reduce [
+						row - 1 col - 1 row - 1 col row - 1 col + 1 row col - 1 row col + 1 row + 1 col - 1 row + 1 col row + 1 col + 1
+					]]
+			][append out get-at r c]
+			out
+		]
 	]
 	vector-op: func [op a b /local i][
 		case [
@@ -261,6 +297,22 @@ context [
 		m: first split-col m/rows + 1 m
 		second split-col n/rows + 1 n
 	]
+	game-of-life: func [m /local out c i][
+		out: copy []
+		c: m/data
+		forall c [
+			s: summa m/neighbours m/get-row-idx i: index? c m/get-col-idx i
+			append out case [
+				all [c/1 = 1 s < 2][0]
+				all [c/1 = 1 find [2 3] s][1]
+				all [c/1 = 1 s > 3][0]
+				all [c/1 = 0 s = 3][1]
+				true [0]
+			]
+		]
+		m/data: out
+		m
+	]
 	
 	ops-rule: ['+ | '- | '* | '/ | '% | '** | '>> | '<< | '>>> | 'and | 'or | 'xor | 'div | 'x | 'augment]
 
@@ -287,6 +339,7 @@ context [
 			| 	'invert
 			| 	'rref
 			|	'identity opt [set d ['l | 'r]] 
+			|	'game-of-life
 			](
 				insert unaries switch/default unary [
 					rotate [reduce [unary n]] 
