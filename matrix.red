@@ -1,7 +1,7 @@
 Red [
 	Author: "Toomas Vooglaid"
 	Date: 7-9-2017
-	Last-update: 4-10-2017
+	Last-update: 31-10-2017
 ]
 mx: context [
 	ctx: self
@@ -51,6 +51,20 @@ mx: context [
 		zero?: does [0 = ctx/summa data]
 		singular?: degenerate?: does [determinant = 0]
 		invertible?: nonsingular?: nondegenerate?: does [not singular?]
+		summa: does [ctx/summa self/data]
+		product: does [ctx/product self/data]
+		sub: func [start [pair!] size [pair!] /put data [block!] /local row][
+			either put [
+				if all [1 = length? data 1 < (size/1 * size/2)][
+					loop size/1 * size/2 - 1 [insert data data/1]
+				]
+				repeat row size/1 [
+					change/part at self/data self/get-idx start/1 - 1 + row start/2 take/part data size/2 size/2
+				]
+			][
+			
+			]
+		]
 		sub-exclude: func [rs cs /local m2][ ; TBD
 			m2: copy self
 			switch type?/word rs [
@@ -71,8 +85,10 @@ mx: context [
 		]
 		transpose: does [ctx/transpose self]
 		rotate: func [n][ctx/rotate n self]
+		rotate-row: func [row n][ctx/rotate-row row n self]
+		rotate-col: func [col n][ctx/rotate-col col n self]
 		show: does [new-line/skip copy data true cols]
-		pretty: function [][;/bar /local d i col-lengths][
+		pretty: function [][;/bar /local d i col-lengths][ m to
 			col-lengths: copy []
 			repeat i cols [
 				c: copy get-col i
@@ -81,15 +97,15 @@ mx: context [
 			]
 			cols2: copy []
 			templ: copy []
-			letters: "abcdefghijklmnopqrstuvwyz" 
+			letters: copy []
 			repeat n cols [
-				append cols2 to-word pick letters n
+				append cols2 to-word rejoin ["_" n]
 				append templ compose [
-					pad/left (to-word pick letters n) (pick col-lengths n) 
+					pad/left (pick cols2 n) (pick col-lengths n)
 					;(either bar and (n < cols) ["│"][""])⎡⎢⎤⎣⎥⎦  ⎾⏋⎿⏌  ⌈⌉⌊⌋
 				]
 			]
-			step: (summa col-lengths) + cols - 1 
+			step: (ctx/summa col-lengths) + cols - 1 
 			print [#"┌" pad #" " step #"┐"]
 			foreach (cols2) data [
 				print [#"│" reduce compose templ #"│"]
@@ -148,8 +164,8 @@ mx: context [
 			]
 		]
 	]
-	product: func [blk /local out][out: 1 forall blk [out: out * blk/1] out]
-	summa: func [blk /local out][out: 0 forall blk [out: out + blk/1] out]
+	product: func [blk /local out][out: 1 forall blk [out: out * blk/1]]
+	summa: 	 func [blk /local out][out: 0 forall blk [out: out + blk/1]]
 	determinant: func [m /local i r l][
 		either m/square? [
 			switch/default m/cols [
@@ -222,6 +238,27 @@ mx: context [
 			3 or -1 [repeat i m/cols [append data copy m/get-col m/cols + 1 - i] m/swap-dim]
 		]
 		m/data: data 
+		m
+	]
+	rotate-row: func [r n m /local start-idx][
+		start-idx: m/get-idx r 1
+		insert at m/data start-idx either negative? n [
+			take/part at m/data start-idx - n m/cols + n 
+		][
+			take/part at m/data start-idx + m/cols - n n 
+		]
+		m
+	]
+	rotate-col: func [c n m /local rows][
+		rows: m/get-col c
+		insert rows either negative? n [
+			take/part at rows 1 - n m/rows + n 
+		][
+			take/part at rows m/rows - n + 1 n 
+		]
+		forall rows [
+			poke m/data m/get-idx index? rows c rows/1
+		]
 		m
 	]
 	swap-rows: function [r1 r2 m][
@@ -323,7 +360,12 @@ mx: context [
 			(either (dim/1 * dim/2) = length? mdata: reduce mdata [
 				m: make mtx [rows: dim/1 cols: dim/2 data: mdata]
 			][
-				cause-error 'user 'message ["Data length does not match dimensions!"]
+				either 1 = length? mdata [
+					loop dim/1 * dim/2 - 1 [insert mdata mdata/1]
+					m: make mtx [rows: dim/1 cols: dim/2 data: mdata]
+				][
+					cause-error 'user 'message ["Data length does not match dimensions!"]
+				]
 			]
 			)
 		|	set w word! if (object? get/any w)(set w m: make mtx get w)
