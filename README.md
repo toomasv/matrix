@@ -251,4 +251,39 @@ matrix [2x2[1-2-2017 1-3-2018 1-4-2017 31-5-2017] + 2x2[2 1 3 3]]
 └                                                  ┘ 
 >> 0.000000000000001 > 2.220446049250313e-16
 == true
+;### Filling ###
+>> matrix [x: 3x3[0]]
+== [
+    0 0 0 
+    0 0 0 
+    0 0 0
+]
+;### Sub-matrix addition ###
+>> x/sub/put 1x1 2x2[1]
+== [0 0 0 0]
+>> x/show
+== [
+    1 1 0 
+    1 1 0 
+    0 0 0
+]
+;### Row rotation (poitive - right, negative - left) ###
+>> x/rotate-row 1 1
+...
+>> x/show
+== [
+    0 1 1 
+    1 1 0 
+    0 0 0
+]
+;### Column rotation (positive - down, negative - up) ###
+>> x/rotate-col 2 -1
+...
+>> x/show
+== [
+    0 1 1 
+    1 0 0 
+    0 1 0
+]
+
 ```
