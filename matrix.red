@@ -1,7 +1,7 @@
 Red [
 	Author: "Toomas Vooglaid"
 	Date: 7-9-2017
-	Last-update: 31-10-2017
+	Last-update: 4-11-2017
 ]
 mx: context [
 	ctx: self
@@ -250,14 +250,21 @@ mx: context [
 		m
 	]
 	rotate-col: func [c n m /local rows][
-		rows: m/get-col c
-		insert rows either negative? n [
-			take/part at rows 1 - n m/rows + n 
+		either block? c [
+			switch type?/word n [
+				integer! [forall c [rotate-col c/1 n m]]
+				block! [forall c [rotate-col c/1 n/(index? c) m]]
+			]
 		][
-			take/part at rows m/rows - n + 1 n 
-		]
-		forall rows [
-			poke m/data m/get-idx index? rows c rows/1
+			rows: m/get-col c
+			insert rows either negative? n [
+				take/part at rows 1 - n m/rows + n 
+			][
+				take/part at rows m/rows - n + 1 n 
+			]
+			forall rows [
+				poke m/data m/get-idx index? rows c rows/1
+			]
 		]
 		m
 	]
