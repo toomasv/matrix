@@ -285,6 +285,15 @@ matrix [2x2[1-2-2017 1-3-2018 1-4-2017 31-5-2017] + 2x2[2 1 3 3]]
     1 0 0 
     0 1 0
 ]
+; Also multi-column rotation
+>> rotate-col [2 3] 1
+...
+>> x/show
+== [
+    0 1 0 
+    1 1 1 
+    0 0 0
+]
 ; m/pretty/tight removes spaces from between columns and can produce eg such maze:
 ┌                                         ┐
 │ █ █   █ ██  ████████ █ █████   █  ██ ██ │
