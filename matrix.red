@@ -1,7 +1,7 @@
 Red [
 	Author: "Toomas Vooglaid"
 	Date: 7-9-2017
-	Last-update: 4-11-2017
+	Last-update: 5-11-2017
 ]
 mx: context [
 	ctx: self
@@ -88,7 +88,7 @@ mx: context [
 		rotate-row: func [row n][ctx/rotate-row row n self]
 		rotate-col: func [col n][ctx/rotate-col col n self]
 		show: does [new-line/skip copy data true cols]
-		pretty: function [][;/bar /local d i col-lengths][ m to
+		pretty: function [/tight][;/bar /local d i col-lengths][ m to
 			col-lengths: copy []
 			repeat i cols [
 				c: copy get-col i
@@ -104,13 +104,13 @@ mx: context [
 					pad/left (pick cols2 n) (pick col-lengths n)
 					;(either bar and (n < cols) ["│"][""])⎡⎢⎤⎣⎥⎦  ⎾⏋⎿⏌  ⌈⌉⌊⌋
 				]
-			]
-			step: (ctx/summa col-lengths) + cols - 1 
-			print [#"┌" pad #" " step #"┐"]
+			] 
+			step: either tight [ctx/summa col-lengths][(ctx/summa col-lengths) + cols - 1] 
+			either tight [print rejoin [#"┌" pad #" " step #"┐"]][print [#"┌" pad #" " step #"┐"]]
 			foreach (cols2) data [
-				print [#"│" reduce compose templ #"│"]
+				either tight [print rejoin [#"│" rejoin templ #"│"]][print [#"│" reduce compose templ #"│"]]
 			]
-			print [#"└" pad #" " step #"┘" #"^/"]
+			either tight [print rejoin [#"└" pad #" " step #"┘" #"^/"]][print [#"└" pad #" " step #"┘" #"^/"]]
 		]
 		swap-rows: func [r1 r2][ctx/swap-rows r1 r2 self]
 		determinant: does [ctx/determinant self]
