@@ -286,7 +286,7 @@ matrix [2x2[1-2-2017 1-3-2018 1-4-2017 31-5-2017] + 2x2[2 1 3 3]]
     0 1 0
 ]
 ; Also multi-column rotation
->> rotate-col [2 3] 1
+>> x/rotate-col [2 3] 1
 ...
 >> x/show
 == [
