@@ -193,7 +193,7 @@ matrix [2x2[1-2-2017 1-3-2018 1-4-2017 31-5-2017] + 2x2[2 1 3 3]]
 ]
 ;### Determinant ###
 >> matrix [determinant 2x2[1 2 3 4]]
-== -5
+== -2
 ;### Trace ###
 >> matrix [trace 2x2[1 2 3 4]]
 == 5
