@@ -1,8 +1,6 @@
 Red [
 	Author: "Toomas Vooglaid"
 	Date: 7-9-2017
-	Last-update: 21-07-2020
-	Description: "data is converted to vector!, so some examples wouldn't work with this file"
 ]
 mx: context [
 	mx-ctx: self
@@ -168,6 +166,8 @@ mx: context [
 			][append out attempt [get-at r c]]
 			out
 		]
+		set-data: does [if type? data = vector! [data: to-block data]]
+		set-vec:  does [if type? data = block!  [data: make vector! data]]
 	]
 	vector-op: func [op [any-function!] a [number! any-block!] b [number! any-block!] /local i [integer!]][
 		case [
